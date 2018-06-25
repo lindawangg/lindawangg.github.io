@@ -4,12 +4,12 @@
 }
 
 .nav-link {
-	font-family: 'Lato';
+	font-family: 'Lato', Helvetica, sans-serif;
 	color: #ABB2B9
 }
 
 p {
-	font-family: 'Oxygen';
+	font-family: 'Oxygen', Helvetica, sans-serif;
 	font-weight: light;
 	color: #808B96
 }
@@ -23,7 +23,7 @@ a:hover {
 }
 
 .copyright {
-	font-family: 'Oxygen';
+	font-family: 'Oxygen', Helvetica, sans-serif;
 	font-weight: light;
 	color: #D5D8DC;
 	font-size: 80%
@@ -31,13 +31,13 @@ a:hover {
 
 .caption {
 	font-size: 80%;
-	font-family: 'Oxygen';
+	font-family: 'Oxygen', Helvetica, sans-serif;
 	font-weight: light;
 	color: #808B96;
 }
 
 body {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Lato', Helvetica, sans-serif;
     color: #808B96
 }
 a {
