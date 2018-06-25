@@ -29,7 +29,7 @@
 
     <!-- Header -->
     ​<div class="container text-center">
-      <img src="needle.jpg" class="img-fluid img-thumbnail img-circle">
+      <img src="images/needle.jpg" class="img-fluid img-thumbnail img-circle">
       <figcaption class="caption">Space Needle - Seattle</figcaption>
     </div>
 
@@ -42,9 +42,62 @@
       </nav>
     </div>
 
-    <!-- About -->
     <div class="container">
-      <p> Coming soon...</p>
+      <p>Here are some projects that I've worked on:</p>
+      <ol>
+        <li><a href="#selective-attention">Response of Selective Attention in Middle Temporal Area</a></li>
+        <li><a href="#miru">MIRU: Voice Assistive System</a></li>
+        <li><a href="#capsnet">Capsule Networks and Face Recognition</a></li>
+        <li><a href="#heartbeats">Listen to Your Heart: Feature Extraction and Classification Methods for Heart Sounds </a></li>
+      </ol>
+    </div>
+
+    <!-- Selective Attention -->
+    <div class="container" id="selective-attention">
+      <div class="card mb-3">
+        <img class="card-img-top" src="images/model.png" alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">Response of Selective Attention in Middle Temporal Area <a href="https://github.com/lindawangg/Visuospatial-Attention"> <i class="fa fa-github"></i></a></h5> 
+          <p class="card-text">The primary visual cortex processes a large amount of visual information, however, due to its large receptive fields, when multiple stimuli fall within one receptive field, there are computational problems. To solve this problem, the visual system uses selective attention, which allocates resources to a specific spatial location, to attend to one of the stimuli in the receptive field. During this process, the center and width of the attending receptive field change. The model presented in the paper, which is extended and altered from Bobier et al., simulates the selective attention between the primary visual cortex, V1, and middle temporal (MT) area. The responses of the MT columns, which encode the target stimulus, are compared to the results of an experiment conducted by Womelsdorf et al. on the receptive field shift and shrinkage in macaque MT area from selective attention. Based on the results, the responses in the MT area are similar to the Gaussian shaped receptive fields found in the experiment. As well, the responses of the MT columns are also measured for accuracy of representing the target visual stimulus and is found to represent the stimulus with a root mean squared error around 0.17 to 0.18. The paper also explores varying model parameters, such as the membrane time constant and maximum firing rates, and how those affect the measurement. This model is a start to modeling the responses of selective attention, however there are still improvements that can be made to better compare with the experiment, produce more accurate responses and incorporate more biologically plausible features.</p>
+          <p>Check out the <a href="projects/selective-attention.pdf" class="link">paper</a>!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIRU: Voice Assistive System -->
+    <div class="container" id="miru">
+      <div class="card mb-3">
+        <img class="card-img-top" src="images/miru-pipeline.png" alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">MIRU: Voice Assistive System <a href="https://github.com/edrickwong/w3p"> <i class="fa fa-github"></i></a></h5> 
+          <p class="card-text">MIRU aims to be a natural-feeling voice assistive system that operates in the kitchen to help visually impaired individuals locate displaced objects in the kitchen. The system focuses on two main components, the user interface and object detection. For the user interface, feasibility testing was done with different voice assistants to determine the best solution in the context of the project. In terms of the object detection, the MobileNet SSD model that was trained on the MS-COCO dataset was retrained in attempt to have a more accurate detection specifically tailored to kitchen objects. On top of these efforts, deployment strategies for the end-to-end system were investigated. From these three components, the full end-to-end system is developed, leveraging Dialogflow and the Google Assistant platform for the front-end solution and MobileNet SSD for a custom object detection model that is optimized for the kitchen setting. The following paper highlights the outcomes of the project, summarizes relevant findings, and presents conclusions and next steps for the project.</p>
+          <p>Check out the <a href="projects/miru.pdf" class="link">paper</a>!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CapsuleNets -->
+    <div class="container" id="capsnet">
+      <div class="card mb-3">
+        <img class="card-img-top mx-auto d-block" src="images/capsnet-graph.png" alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">Capsule Networks and Face Recognition <a href="https://github.com/krishnr/CapsNet4Faces"> <i class="fa fa-github"></i></a></h5> 
+          <p class="card-text">Although CNNs are widely used in vision tasks and achieve high accuracies, they can still fail on unseen data as they handle images quite differently than the brain. CNNs do not encode position and orientation relationships between features and so can be easily tricked. Capsule Networks were conceived by Hinton et al. as a more robust architecture capable of storing pose information and spatial relationships to recognize objects more like the brain does. Lower-level capsules store 8 dimensional vectors of features such as position, hue, texture etc. which they route to higher-level capsules using a novel routing by agreement algorithm. This gives capsule networks viewpoint invariance--which has so far eluded CNNs. Capsule Networks have produced great results on the MNIST dataset, and this paper extends the previous work to apply Capsule Networks to a face recognition task on the Labeled Faces in the Wild dataset. The trained model achieves a test accuracy of 93.7\% and performs well on unseen faces that were rotated or blurred, matching or beating the performance of state-of-the-art CNNs. From previous results and the results of this paper, it can be concluded that capsule networks can outperform deeper CNNs on unseen transformed data due to their unique equivariance properties.</p>
+          <p>Check out the <a href="projects/capsnet.pdf" class="link">paper</a>!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classifying Heartbeats -->
+     <div class="container" id="heartbeats">
+      <div class="card mb-3">
+        <img class="mx-auto d-block" src="images/spread-A.png" alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">Listen to Your Heart: Feature Extraction and Classification Methods for Heart Sounds <a href="https://github.com/lindawangg/Classifying-Heartbeats"> <i class="fa fa-github"></i></a></h5> 
+          <p class="card-text">Heart irregularities are commonly detected using a stethoscope by a physician. Currently, there are digital stethoscopes and mobile devices that anyone can use to record their heart sounds, however, without medical knowledge, it will be difficult for them to know if there are any irregularities. This paper presents a process for classifying those audio heart recordings to five most commonly occurring classes: artifact, extra heart sound, extrasystole, murmur and normal heartbeat. The paper also compares the precision and F-scores of six machine learning models, which include Naive Bayes, Support Vector Machines and Decision Trees. Using the process outlined in this paper, the results are a significant improvement to the state of the art for all classes except for extrasystole and normal heartbeats. The paper also outlines practicality and next steps to improve audio heart sound classification. </p>
+          <p>Check out the <a href="projects/classifying-heartbeats.pdf" class="link">paper</a>!</p>
+        </div>
+      </div>
     </div>
 
     <!-- Footer -->
