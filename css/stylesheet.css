@@ -166,3 +166,7 @@ ul.social-icons {
     background-color: #0073a4;
     color: #fff;
 }
+
+.fa-file-text-o:hover {
+  color: #009688;
+}
