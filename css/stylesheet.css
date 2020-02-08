@@ -16,7 +16,7 @@ p {
 }
 
 a:hover {
-	color: #566573;
+	color: #31b3a4;
 }
 
 .active {
@@ -69,10 +69,10 @@ body {
 }
 a {
     text-decoration: none;
-    color: #808B96;
+    color: #31b3a4;
 }
 p > a:hover{
-    color: #d9d9d9;
+    color: #31b3a4;
     text-decoration:  underline;
 }
 
