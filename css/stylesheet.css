@@ -20,7 +20,7 @@ a:hover {
 }
 
 .active {
-	color: #566573;
+	color: #31b3a4;
 }
 
 .copyright {
@@ -44,6 +44,11 @@ a:hover {
 .card-title .fa-github:hover {
     color: #333;
     background-color: #fff
+}
+
+p >.fa-github:hover {
+  color: #333;
+  background-color: #fff
 }
 
 .custom-bullet li {
