@@ -46,9 +46,9 @@ a:hover {
     background-color: #fff
 }
 
-p >.fa-github:hover {
-  color: #333;
-  background-color: #fff
+.a-link .fa-github:hover {
+    color: #333;
+    background-color: #fff
 }
 
 .custom-bullet li {
