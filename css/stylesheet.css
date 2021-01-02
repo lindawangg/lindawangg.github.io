@@ -183,3 +183,18 @@ ul.social-icons {
 .ai-google-scholar:hover {
   color: #4885ed;
 }
+
+.fa-medium {
+    padding:8px 8px;
+    -o-transition:.5s;
+    -ms-transition:.5s;
+    -moz-transition:.5s;
+    -webkit-transition:.5s;
+    transition: .5s;
+    background-color: #fff;
+}
+
+.fa-medium:hover {
+    background-color: #333;
+    color: #fff;
+}
