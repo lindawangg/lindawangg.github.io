@@ -541,3 +541,55 @@ a { color: var(--ink); text-decoration: none; }
   .utility__brand .utility__brand-text,
   .topnav__brand .topnav__brand-text { display: none; }
 }
+
+@media (max-width: 600px) {
+  /* Hero — phone sizing */
+  .hero { height: auto; min-height: 560px; padding-bottom: 28px; }
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+    padding: 100px 20px 0;
+    left: auto; right: auto; bottom: auto;
+    gap: 20px;
+  }
+  .utility { z-index: 3; }
+  .hero__title { font-size: 44px; letter-spacing: -0.02em; }
+  .hero__eyebrow { font-size: 10px; letter-spacing: 0.15em; margin-top: 16px; }
+  .hero__chips { gap: 6px; margin-bottom: 16px; }
+  .chip { font-size: 9px; padding: 4px 8px; }
+
+  /* Utility / topnav — drop the right-side edition stamp */
+  .utility, .topnav { padding: 16px 20px; gap: 10px; }
+  .utility > div:last-child,
+  .topnav > div:last-child { display: none; }
+  .utility__nav, .topnav nav { gap: 14px; font-size: 10px; }
+
+  /* Profile card — compact on phone */
+  .profile-card { padding: 16px; }
+  .profile-card img { aspect-ratio: 16/10; }
+
+  /* Body sections */
+  .lede { padding: 40px 20px 0; }
+  .lede p { font-size: 19px; }
+  .section { padding: 36px 20px 0; }
+  .prose { font-size: 17px; }
+  .timeline { font-size: 12px; }
+  .timeline__row { grid-template-columns: 72px 1fr; gap: 12px; }
+
+  /* Publications */
+  .pubs { padding: 40px 20px; }
+  .pubs__title { font-size: 32px; }
+  .pub-featured h3 { font-size: 22px; }
+  .pub-featured__authors { font-size: 14px; }
+  .pub-featured__cta { flex-wrap: wrap; }
+  .pub-row { grid-template-columns: 50px 1fr; gap: 14px; }
+  .pub-row h4 { font-size: 18px; }
+  .pub-row__year { font-size: 22px; }
+
+  /* Notes */
+  .note { grid-template-columns: 64px 1fr; gap: 12px; }
+  .note__body { font-size: 16px; }
+
+  /* Colophon */
+  .colophon { margin: 40px 20px 0; padding: 18px 0 40px; }
+}
