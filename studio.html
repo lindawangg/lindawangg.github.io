@@ -818,6 +818,115 @@
       .vfx-controls { grid-template-columns: 1fr; gap: 10px; }
       .vfx__row--post::before { font-size: 8.5px; padding: 0 10px; }
     }
+
+    /* ============================================================
+       ViT FLOPs Calculator
+       ============================================================ */
+    .vit-calc {
+      margin-top: 36px;
+      background: var(--dark);
+      border-radius: 14px;
+      padding: 28px;
+      color: var(--cream);
+      font-family: var(--mono);
+    }
+    .vit-calc__row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+    .vit-calc label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(236,231,223,0.65);
+    }
+    .vit-calc input[type="number"],
+    .vit-calc select {
+      width: 90px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
+      background: rgba(0,0,0,0.4);
+      color: var(--cream);
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .vit-calc input:focus,
+    .vit-calc select:focus { border-color: var(--tea); }
+    .vit-calc select { width: 140px; }
+    .vit-calc__op {
+      align-self: flex-end;
+      padding-bottom: 11px;
+      color: var(--tea);
+      font-size: 14px;
+    }
+    .vit-calc__result {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px dashed rgba(255,255,255,0.12);
+    }
+    .vit-calc__breakdown {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px 24px;
+      max-width: 480px;
+      margin: 0 0 18px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .vit-calc__breakdown dt { color: rgba(236,231,223,0.65); }
+    .vit-calc__breakdown dd {
+      margin: 0;
+      text-align: right;
+      color: var(--cream);
+      font-variant-numeric: tabular-nums;
+    }
+    .vit-calc__total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      max-width: 480px;
+      padding: 16px 0 6px;
+      border-top: 1px solid rgba(49,179,164,0.55);
+    }
+    .vit-calc__total-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--tea);
+    }
+    .vit-calc__total-value {
+      font-family: var(--serif);
+      font-size: 36px;
+      letter-spacing: -0.01em;
+      color: var(--tea);
+      font-variant-numeric: tabular-nums;
+    }
+    .vit-calc__note {
+      margin: 18px 0 0;
+      font-family: var(--serif);
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(236,231,223,0.55);
+      max-width: 640px;
+    }
+
+    @media (max-width: 600px) {
+      .vit-calc { padding: 18px; }
+      .vit-calc input[type="number"] { width: 72px; }
+      .vit-calc select { width: 120px; }
+      .vit-calc__total-value { font-size: 28px; }
+    }
   </style>
 </head>
 <body>
@@ -1126,6 +1235,77 @@
     </div>
   </section>
 
+  <!-- ============== §02 — ViT FLOPS CALCULATOR ============== -->
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__num"><span>02 —</span>VIT FLOPS<br>CALCULATOR</div>
+      <div>
+        <div class="prose">
+          <p>
+            Back-of-envelope total FLOPs and parameter count for a Vision Transformer given its
+            architecture and input shape. Pick a standard preset, or tweak any value to see how the
+            numbers shift.
+          </p>
+        </div>
+
+        <div class="vit-calc">
+          <div class="vit-calc__form">
+            <div class="vit-calc__row">
+              <label>Preset
+                <select id="vcPreset">
+                  <option value="Custom">Custom</option>
+                  <option value="ViT-Ti">ViT-Ti</option>
+                  <option value="ViT-S">ViT-S</option>
+                  <option value="ViT-B" selected>ViT-B</option>
+                  <option value="ViT-L">ViT-L</option>
+                  <option value="ViT-H">ViT-H</option>
+                  <option value="ViT-G">ViT-G</option>
+                </select>
+              </label>
+            </div>
+            <div class="vit-calc__row">
+              <label>Image H<input type="number" id="vcH" value="224" min="1"></label>
+              <span class="vit-calc__op">×</span>
+              <label>Image W<input type="number" id="vcW" value="224" min="1"></label>
+              <label>Patch P<input type="number" id="vcP" value="16" min="1"></label>
+            </div>
+            <div class="vit-calc__row">
+              <label>Embed D<input type="number" id="vcD" value="768" min="1"></label>
+              <label>Layers N<input type="number" id="vcN" value="12" min="1"></label>
+              <label>Heads h<input type="number" id="vcHeads" value="12" min="1"></label>
+              <label>MLP ratio<input type="number" id="vcMlp" value="4" min="1" step="0.01"></label>
+            </div>
+          </div>
+
+          <div class="vit-calc__result">
+            <dl class="vit-calc__breakdown">
+              <dt>Sequence length L</dt>
+              <dd id="vcL">—</dd>
+              <dt>Patch embedding</dt>
+              <dd id="vcPatchEmb">—</dd>
+              <dt>Attention (×N)</dt>
+              <dd id="vcAttn">—</dd>
+              <dt>MLP (×N)</dt>
+              <dd id="vcMlpOut">—</dd>
+              <dt>Parameters</dt>
+              <dd id="vcParams">—</dd>
+            </dl>
+            <div class="vit-calc__total">
+              <span class="vit-calc__total-label">FLOPs / forward</span>
+              <span class="vit-calc__total-value" id="vcTotal">—</span>
+            </div>
+          </div>
+
+          <p class="vit-calc__note">
+            FLOPs counted as multiply-accumulates — matches the convention in the ViT and DeiT
+            papers. LayerNorm, softmax, GELU, and biases are dropped as negligible next to the
+            matmuls. Heads is informational only: total FLOPs are the same as long as D = h · dₖ.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============== COLOPHON ============== -->
   <footer class="colophon colophon--two">
     <div>
@@ -1148,6 +1328,86 @@
       Last set · 2026 &nbsp;·&nbsp; Set in Newsreader &amp; JetBrains Mono &nbsp;·&nbsp; © Linda Wang
     </div>
   </footer>
+
+  <script>
+    /* ViT FLOPs calculator */
+    (function () {
+      // Presets set ARCHITECTURE only (D, N, h, mlp_ratio). Image size and patch size
+      // are independent inputs — ViT-L works at P=14 or P=16, 224 or 384, etc.
+      const presets = {
+        'ViT-Ti': { D: 192,  N: 12, h: 3,  mlp: 4 },
+        'ViT-S':  { D: 384,  N: 12, h: 6,  mlp: 4 },
+        'ViT-B':  { D: 768,  N: 12, h: 12, mlp: 4 },
+        'ViT-L':  { D: 1024, N: 24, h: 16, mlp: 4 },
+        'ViT-H':  { D: 1280, N: 32, h: 16, mlp: 4 },
+        'ViT-G':  { D: 1664, N: 48, h: 16, mlp: 4.92 } // Scaling ViT (Zhai 2022) — MLP=8192
+      };
+      const id = (s) => document.getElementById(s);
+      const fields = {
+        H: id('vcH'), W: id('vcW'), P: id('vcP'),
+        D: id('vcD'), N: id('vcN'), h: id('vcHeads'), mlp: id('vcMlp')
+      };
+      const fmtFlops = (f) => {
+        if (!isFinite(f) || f <= 0) return '—';
+        if (f >= 1e12) return (f / 1e12).toFixed(2) + ' T';
+        if (f >= 1e9)  return (f / 1e9 ).toFixed(2) + ' G';
+        if (f >= 1e6)  return (f / 1e6 ).toFixed(2) + ' M';
+        if (f >= 1e3)  return (f / 1e3 ).toFixed(2) + ' K';
+        return f.toFixed(0);
+      };
+      const fmtParams = (p) => {
+        if (!isFinite(p) || p <= 0) return '—';
+        if (p >= 1e9) return (p / 1e9).toFixed(2) + ' B';
+        if (p >= 1e6) return (p / 1e6).toFixed(1) + ' M';
+        if (p >= 1e3) return (p / 1e3).toFixed(1) + ' K';
+        return p.toFixed(0);
+      };
+      function compute() {
+        const H = +fields.H.value, W = +fields.W.value, P = +fields.P.value;
+        const D = +fields.D.value, N = +fields.N.value, mlp = +fields.mlp.value;
+        if (!P || !D || !N || !H || !W || !mlp || P > H || P > W) {
+          ['vcL','vcPatchEmb','vcAttn','vcMlpOut','vcParams','vcTotal']
+            .forEach(i => id(i).textContent = '—');
+          return;
+        }
+        const Np  = Math.floor(H / P) * Math.floor(W / P);
+        const L   = Np + 1;            // +1 for CLS
+        const dff = D * mlp;
+
+        // FLOPs (counted as multiply-accumulates)
+        const patchEmbed   = Np * (P * P * 3) * D;
+        const attnPerBlock = 4 * L * D * D + 2 * L * L * D;   // QKV + out + scores + AV
+        const mlpPerBlock  = 2 * L * D * dff;                  // 2 linears, each L*D*dff MACs
+        const total = patchEmbed + N * (attnPerBlock + mlpPerBlock);
+
+        // Parameters per block:
+        //   QKV+out projections: 4D² + 4D
+        //   2 LayerNorms:        4D
+        //   MLP:                 2·mlp·D² + (mlp+1)·D    (two linears D→dff and dff→D with biases)
+        const patchParams      = (P * P * 3) * D + D;
+        const posClsLnParams   = (L + 3) * D;
+        const perBlockParams   = (4 + 2 * mlp) * D * D + (9 + mlp) * D;
+        const params = patchParams + posClsLnParams + N * perBlockParams;
+
+        id('vcL').textContent        = L.toLocaleString();
+        id('vcPatchEmb').textContent = fmtFlops(patchEmbed);
+        id('vcAttn').textContent     = fmtFlops(N * attnPerBlock);
+        id('vcMlpOut').textContent   = fmtFlops(N * mlpPerBlock);
+        id('vcParams').textContent   = fmtParams(params);
+        id('vcTotal').textContent    = fmtFlops(total);
+      }
+      function applyPreset(name) {
+        const p = presets[name]; if (!p) return;
+        Object.entries(p).forEach(([k, v]) => fields[k].value = v);
+        compute();
+      }
+      Object.values(fields).forEach(f =>
+        f.addEventListener('input', () => { id('vcPreset').value = 'Custom'; compute(); })
+      );
+      id('vcPreset').addEventListener('change', (e) => applyPreset(e.target.value));
+      applyPreset('ViT-B');
+    })();
+  </script>
 
   <script src="studio.js"></script>
 
