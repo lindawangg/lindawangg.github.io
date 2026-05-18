@@ -1,105 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Linda Wang</title>
+  <meta name="description" content="Linda Wang — machine learning engineer working on computer vision at Meta. Previously Lyft Level 5 and the VIP Lab at the University of Waterloo.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="assets/lw-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300..700;1,300..700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
 
-  <head>
+  <!-- ============== HERO ============== -->
+  <header class="hero">
+    <img class="hero__photo" src="assets/banff.jpg" alt="">
+    <div class="hero__scrim"></div>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Linda Wang</title>
-    <link rel="icon" href="lw-icon.png">
-    <link rel="image_src" href="images/profile-oregon.jpg"/>
-
-    <!-- Bootstrap core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom fonts for this template -->
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Lato">
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Oxygen">
-    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
-    <!-- Custom styles for this template -->
-    <link href="css/stylesheet.css" rel="stylesheet">
-    <link rel="stylesheet" href="academicons-1.8.6/css/academicons.min.css"/>
-
-  </head>
-
-  <body>
-
-    <!-- Header -->
-    ​<div class="container text-center">
-      <img src="images/profile-meta.jpg" class="img-fluid img-thumbnail img-circle">
-      <figcaption class="caption">linda.wang AT uwaterloo.ca </figcaption>
-      <figcaption class="caption">
-        <a href="https://scholar.google.com/citations?user=4azPe_YAAAAJ&hl=en"><i class="ai ai-google-scholar ai-1x"></i></a>
-        CV/resume: <a href="cv/cv-2021.pdf"><i class="fa fa-file-text-o"></i></a>
-      </figcaption>
-    </div>
-
-    <!-- Navigation -->
-    <div class="container">
-      <nav class="navbar navbar-expand-sm justify-content-center">
-        <a class="nav-link active" href="index.html">About</a>
-        <a class="nav-link" href="publications.html">Publications</a>
-        <a class="nav-link" href="news.html">News</a>
+    <div class="utility">
+      <a class="utility__brand" href="index.html">
+        <svg class="utility__logo" viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#31b3a4" stroke-width="3"/>
+          <text x="60" y="62" text-anchor="middle" dominant-baseline="central" font-family="Sacramento, cursive" font-weight="400" font-size="46" fill="#31b3a4">LW</text>
+        </svg>
+        <span class="utility__brand-text">Linda Wang</span>
+      </a>
+      <nav class="utility__nav">
+        <a class="active" href="index.html">About</a>
+        <a href="publications.html">Publications</a>
+        <a href="notes.html">Notes</a>
       </nav>
+      <div>2026 Edition</div>
     </div>
 
-    <!-- About -->
-    <div class="container">
-      <p> Hi, I'm Linda! </p>
-      <p>I'm currently a machine learning engineer working on computer vision for the AI Content Understanding team at Meta.
-        Previously I worked on 2D semantic segmentation and 3D object detection for perception on self driving cars at Lyft Level 5.
-        Before coming into industry, I was a Masters research student, supervised by Prof.
-        <a href="http://www.eng.uwaterloo.ca/~a28wong/">Alexander Wong</a>, in the Vision
-        and Image Processing Lab at the University of Waterloo, where I also completed my undergraduate
-        degree in Systems Design Engineering.
-      </p>
-      <p>My main focus is in applications of computer vision and deep learning,
-        specializing in visual perception and scene understanding. The goal of my
-        masters research was to design an AI-driven assistive technology for those
-        with visual impairment by combining different visual perceptions in order
-        to produce a rich scene understanding, while also maintaining a balance
-        between speed, accuracy and size for operational AI. In addition to my
-        thesis research, I am also involved in medical research projects, such as
-        prostate cancer and COVID-19 detection. I have presented my research at CVPR
-        and NeurIPS, as well as published in Sensors and Nature Scientific Reports.
-      </p>
-      <p>During my undergrad and masters, I have completed internships at Darwin AI, where I worked on developing
-        efficient deep learning models, Lyft Level 5, where I worked on
-        <a href="https://medium.com/lyftlevel5/behind-the-scenes-interning-at-level-5-dfe2c1eb2218">monocular depth estimation</a>
-        for autonomous vehicles on the Perception team,
-        and at Facebook on the Computational Photography team.
-      </p>
-      <p>When I'm not researching or working, you'll most likely find me taking pictures
-        &#x1F4F8;, hiking <a href="https://www.alltrails.com/members/linda-wang-12">&#9968;</a>,
-        traveling &#127759;, eating &#x1F35C; or swimming &#x1F3CA;.
-      </p>
+    <div class="hero__inner">
+      <div>
+        <div class="hero__chips">
+          <span class="chip"><span class="chip__dot"></span>Now at Meta · AI Content Understanding</span>
+          <span class="chip">Menlo Park, CA</span>
+        </div>
+        <h1 class="hero__title">
+          I teach machines<br>
+          <em>to see</em> the world<span class="dot">.</span>
+        </h1>
+        <div class="hero__eyebrow">
+          Linda Wang &nbsp;·&nbsp; Machine learning engineer &nbsp;·&nbsp; Computer vision
+        </div>
+      </div>
+
+      <aside class="profile-card">
+        <img src="assets/profile-meta.jpg" alt="Portrait of Linda Wang">
+        <div class="profile-card__label">Currently</div>
+        <div class="profile-card__status">Training and shipping vision models that scale to billions of pieces of content.</div>
+        <div class="profile-card__links">
+          <a href="https://scholar.google.com/citations?user=4azPe_YAAAAJ&hl=en">Scholar↗</a>
+          <a href="https://github.com/lindawangg">GitHub↗</a>
+          <a href="https://www.linkedin.com/in/lindawang95/">LinkedIn↗</a>
+        </div>
+      </aside>
     </div>
 
-    <div class="container text-center footer-social-icons">
-      <p>Connect with/follow me on: </p>
-      <ul class="social-icons">
-          <li><a href="https://scholar.google.com/citations?user=4azPe_YAAAAJ&hl=en" class="social-icon"><i class="ai ai-google-scholar ai-2x"></i></a></li>
-          <li><a href="https://www.facebook.com/linda.wang513" class="social-icon"> <i class="fa fa-facebook"></i></a></li>
-          <li><a href="https://www.instagram.com/lindawanggg/" class="social-icon"> <i class="fa fa-instagram"></i></a></li>
-          <li><a href="https://github.com/lindawangg" class="social-icon"> <i class="fa fa-github"></i></a></li>
-          <li><a href="https://www.linkedin.com/in/lindawang95/" class="social-icon"> <i class="fa fa-linkedin"></i></a></li>
-          <li><a href="https://lindawangg.medium.com/" class="social-icon"> <i class="fa fa-medium"></i></a></li>
-      </ul>
+    <div class="hero__caption">PLATE · ICEFIELDS PKWY, AB &nbsp;·&nbsp; 51.42°N 116.18°W</div>
+  </header>
+
+  <!-- ============== LEDE ============== -->
+  <section class="lede">
+    <p>
+      I build and scale vision foundation models at <a href="https://ai.meta.com/">Meta</a>,
+      training joint image &amp; video models and shipping them across billions of pieces of
+      content on the AI Content Understanding team. Before Meta I worked on perception — 2D
+      segmentation and 3D detection — for self-driving cars at
+      <a href="https://medium.com/lyftlevel5/behind-the-scenes-interning-at-level-5-dfe2c1eb2218">Lyft&nbsp;Level&nbsp;5</a>,
+      and trained as a researcher under <a href="http://www.eng.uwaterloo.ca/~a28wong/">Alexander&nbsp;Wong</a>
+      in the Vision &amp; Image Processing Lab at the University of Waterloo.
+    </p>
+  </section>
+
+  <!-- ============== §01 — WORK & STUDY ============== -->
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__num"><span>01 —</span>WORK<br>&amp; STUDY</div>
+      <div>
+        <div class="timeline">
+          <div class="timeline__row timeline__row--current">
+            <span class="timeline__year">2022 →</span>
+            <span class="timeline__place">Meta</span>
+            <span class="timeline__role">ML Engineer · AI Content Understanding</span>
+            <span class="timeline__tag"><span class="now-pill">NOW</span></span>
+          </div>
+          <div class="timeline__row">
+            <span class="timeline__year">2020–22</span>
+            <span class="timeline__place">Lyft Level 5</span>
+            <span class="timeline__role">ML Engineer · Perception — segmentation, 3D detection</span>
+            <span class="timeline__tag"></span>
+          </div>
+          <div class="timeline__row">
+            <span class="timeline__year">2020</span>
+            <span class="timeline__place">Darwin AI</span>
+            <span class="timeline__role">Research Intern · COVID-Net, efficient deep learning</span>
+            <span class="timeline__tag"></span>
+          </div>
+          <div class="timeline__row">
+            <span class="timeline__year">2019</span>
+            <span class="timeline__place">Lyft Level 5</span>
+            <span class="timeline__role">Intern · Monocular depth estimation</span>
+            <span class="timeline__tag"></span>
+          </div>
+          <div class="timeline__row">
+            <span class="timeline__year">2018–20</span>
+            <span class="timeline__place">U. Waterloo (VIP Lab)</span>
+            <span class="timeline__role">MASc, AI &amp; Computer Vision · Advisor: Alexander Wong</span>
+            <span class="timeline__tag"></span>
+          </div>
+          <div class="timeline__row">
+            <span class="timeline__year">2013–18</span>
+            <span class="timeline__place">U. Waterloo</span>
+            <span class="timeline__role">BASc, Systems Design Engineering · with distinction</span>
+            <span class="timeline__tag"></span>
+          </div>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <!-- Footer -->
-    <div class="container text-center">
-      <p class="copyright">Copyright &copy; 2021</p>
+  <!-- ============== COLOPHON ============== -->
+  <footer class="colophon colophon--two">
+    <div>
+      <div class="colophon__heading">Find me</div>
+      <div class="colophon__body colophon__links">
+        <a href="https://scholar.google.com/citations?user=4azPe_YAAAAJ&hl=en">Scholar</a>
+        <a href="https://github.com/lindawangg">GitHub</a>
+        <a href="https://www.linkedin.com/in/lindawang95/">LinkedIn</a>
+        <a href="https://lindawangg.medium.com/">Medium</a>
+        <a href="https://www.instagram.com/lindawanggg/">Instagram</a>
+      </div>
     </div>
+    <div class="colophon__stamp" aria-hidden="true">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="#31b3a4" stroke-width="2"/>
+        <text x="60" y="62" text-anchor="middle" dominant-baseline="central" font-family="Sacramento, cursive" font-weight="400" font-size="46" fill="#31b3a4">LW</text>
+      </svg>
+    </div>
+    <div class="colophon__right">
+      Last set · 2026 &nbsp;·&nbsp; Set in Newsreader &amp; JetBrains Mono &nbsp;·&nbsp; © Linda Wang
+    </div>
+  </footer>
 
-    <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  </body>
-
+</body>
 </html>
