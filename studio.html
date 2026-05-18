@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio — Linda Wang</title>
+  <meta name="description" content="Linda Wang — Studio: sketches, visualizations, and prototypes.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="assets/lw-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,300..700;1,300..700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+
+  <style>
+    /* ============================================================
+       ViT Explorer — interactive pipeline visualization
+       ============================================================ */
+    .vfx {
+      margin-top: 36px;
+      background: var(--dark);
+      border-radius: 14px;
+      padding: 28px;
+      color: var(--cream);
+      font-family: var(--mono);
+    }
+
+    /* Pipeline ribbon — clickable step chips */
+    .vfx__ribbon {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .vfx-chip {
+      flex: 1;
+      min-width: 60px;
+      padding: 9px 8px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(236,231,223,0.55);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .vfx-chip:hover { color: var(--tea); border-color: rgba(49,179,164,0.35); }
+    .vfx-chip__num {
+      display: block;
+      font-size: 8px;
+      color: var(--tea);
+      margin-bottom: 3px;
+      letter-spacing: 0.2em;
+    }
+    .vfx-chip.is-active {
+      background: rgba(49,179,164,0.12);
+      border-color: var(--tea);
+      color: var(--cream);
+    }
+
+    /* Main canvas — two-row layout (MHA inputs → outputs on row 1, post-MHA computations on row 2) */
+    .vfx__canvas {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      min-height: 380px;
+      padding: 14px 4px 28px;
+    }
+    .vfx__row {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 200px;
+    }
+    .vfx__row--post {
+      transition: opacity 0.45s ease, filter 0.45s ease;
+      padding-top: 14px;
+      border-top: 1px dashed rgba(255,255,255,0.08);
+      position: relative;
+    }
+    .vfx__row--post::before {
+      content: 'Attention output → MLP → block output ↓';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      color: var(--tea);
+      text-transform: uppercase;
+      background: var(--dark);
+      padding: 0 14px;
+      white-space: nowrap;
+    }
+
+    /* SVG overlay drawn above stages — for trace lines */
+    .vfx__trace {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      overflow: visible;
+    }
+    .vfx__trace path {
+      fill: none;
+      stroke: var(--tea);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      filter: drop-shadow(0 0 4px rgba(49,179,164,0.6));
+    }
+    .vfx.is-traced .vfx__trace path { opacity: 0.8; }
+
+    /* ===== Stage shell ===== */
+    .vfx-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.35s ease, filter 0.35s ease;
+      min-width: 0;
+      position: relative;
+    }
+    .vfx-stage__head {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--tea);
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .vfx-stage__body {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      min-height: 0;
+    }
+    .vfx-stage__shape {
+      font-size: 8.5px;
+      letter-spacing: 0.12em;
+      color: rgba(236,231,223,0.45);
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    /* Step-based focus — stages dim/brighten based on data-step */
+    .vfx[data-step="1"] .vfx-stage:not([data-stage="image"]) { opacity: 0.18; filter: saturate(0.4); }
+    .vfx[data-step="2"] .vfx-stage[data-stage="image"] { opacity: 1; }
+    .vfx[data-step="2"] .vfx-stage:not([data-stage="image"]) { opacity: 0.22; filter: saturate(0.4); }
+
+    .vfx[data-step="3"] .vfx-stage[data-stage="image"],
+    .vfx[data-step="3"] .vfx-stage[data-stage="embed"] { opacity: 1; }
+    .vfx[data-step="3"] .vfx-stage:not([data-stage="image"]):not([data-stage="embed"]) { opacity: 0.22; filter: saturate(0.4); }
+
+    .vfx[data-step="4"] .vfx-stage[data-stage="image"] { opacity: 0.55; filter: saturate(0.7); }
+    .vfx[data-step="4"] .vfx-stage[data-stage="embed"],
+    .vfx[data-step="4"] .vfx-stage[data-stage="q"],
+    .vfx[data-step="4"] .vfx-stage[data-stage="k"],
+    .vfx[data-step="4"] .vfx-stage[data-stage="v"] { opacity: 1; }
+    .vfx[data-step="4"] .vfx-stage[data-stage="attn"],
+    .vfx[data-step="4"] .vfx-stage[data-stage="output"],
+    .vfx[data-step="4"] .vfx-stage[data-stage="mlp"],
+    .vfx[data-step="4"] .vfx-stage[data-stage="block"] { opacity: 0.22; filter: saturate(0.4); }
+
+    .vfx[data-step="5"] .vfx-stage[data-stage="image"] { opacity: 0.35; filter: saturate(0.5); }
+    .vfx[data-step="5"] .vfx-stage[data-stage="embed"] { opacity: 0.55; filter: saturate(0.7); }
+    .vfx[data-step="5"] .vfx-stage[data-stage="attn"] { opacity: 1; }
+    .vfx[data-step="5"] .vfx-stage[data-stage="output"],
+    .vfx[data-step="5"] .vfx-stage[data-stage="mlp"],
+    .vfx[data-step="5"] .vfx-stage[data-stage="block"] { opacity: 0.22; filter: saturate(0.4); }
+
+    .vfx[data-step="6"] .vfx-stage[data-stage="image"] { opacity: 0.3; filter: saturate(0.5); }
+    .vfx[data-step="6"] .vfx-stage[data-stage="embed"] { opacity: 0.5; filter: saturate(0.7); }
+    .vfx[data-step="6"] .vfx-stage[data-stage="output"],
+    .vfx[data-step="6"] .vfx-stage[data-stage="mlp"],
+    .vfx[data-step="6"] .vfx-stage[data-stage="block"] { opacity: 1; }
+
+    /* Step 7 & 8 — full visibility */
+    .vfx[data-step="7"] .vfx-stage,
+    .vfx[data-step="8"] .vfx-stage { opacity: 1; filter: none; }
+
+    /* ===== Image stage ===== */
+    .vfx-image {
+      position: relative;
+      width: 100%;
+      max-width: 200px;
+      aspect-ratio: 4 / 3;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #0c0d0c;
+    }
+    .vfx-image__bg {
+      position: absolute;
+      inset: 0;
+      background: url('assets/banff.jpg') center/cover;
+      transition: filter 0.4s ease;
+    }
+    .vfx-image__grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .vfx[data-step="1"] .vfx-image__grid { opacity: 0; }
+    .vfx:not([data-step="1"]) .vfx-image__grid { opacity: 1; pointer-events: auto; }
+    .vfx-patch {
+      border: 1px solid rgba(255,255,255,0.18);
+      cursor: pointer;
+      transition: outline 0.18s ease, transform 0.25s ease, box-shadow 0.18s ease;
+      outline: 0 solid transparent;
+      box-shadow: inset 0 0 0 0 rgba(49,179,164,0);
+    }
+    .vfx-patch:hover {
+      outline: 2px solid var(--tea);
+      z-index: 2;
+      transform: scale(1.06);
+    }
+    .vfx-patch.is-traced {
+      outline: 2px solid var(--tea);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4), 0 0 0 3px rgba(49,179,164,0.25);
+      z-index: 3;
+    }
+
+    /* ===== Token columns (used for embed / Q / K / V / output) ===== */
+    .vfx-tokens {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5px;
+      min-width: 32px;
+      max-width: 60px;
+    }
+    .vfx-token {
+      flex: 1;
+      min-height: 6px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, outline 0.18s ease;
+      outline: 0 solid transparent;
+      position: relative;
+    }
+    .vfx-token--cls {
+      flex: 0 0 11px;
+      min-height: 11px;
+      background: var(--tea) !important;
+      box-shadow: 0 0 6px rgba(49,179,164,0.55), inset 0 0 0 1px rgba(255,255,255,0.5);
+      margin-bottom: 3px;
+    }
+    .vfx-token:hover {
+      transform: scaleX(1.6);
+      outline: 1.5px solid var(--tea);
+      z-index: 4;
+    }
+    .vfx-token.is-traced {
+      transform: scaleX(1.6);
+      outline: 1.5px solid var(--tea);
+      box-shadow: 0 0 8px rgba(49,179,164,0.7);
+      z-index: 4;
+    }
+
+    /* ===== Q,K,V grouping ===== */
+    .vfx-qkv {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+    }
+    .vfx-qkv .vfx-stage { flex: 1; }
+    .vfx-qkv .vfx-tokens { max-width: 40px; }
+
+    /* ===== Attention matrix ===== */
+    .vfx-matrix {
+      width: 100%;
+      max-width: 200px;
+      aspect-ratio: 1;
+      display: grid;
+      gap: 1px;
+      background: rgba(0,0,0,0.4);
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .vfx-cell {
+      background: var(--tea);
+      border-radius: 1px;
+      cursor: pointer;
+      transition: outline 0.15s ease, opacity 0.2s ease;
+      outline: 0 solid transparent;
+      position: relative;
+    }
+    .vfx-cell:hover {
+      outline: 1.5px solid #fff;
+      z-index: 5;
+      opacity: 1 !important;
+    }
+    .vfx-cell.is-traced-row,
+    .vfx-cell.is-traced-col {
+      outline: 1.5px solid rgba(49,179,164,0.9);
+      opacity: 1 !important;
+    }
+
+    /* ===== Flow connectors between stages ===== */
+    .vfx-flow {
+      align-self: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--tea);
+      flex-shrink: 0;
+      padding: 0 2px;
+    }
+    .vfx-flow__arrow {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .vfx-flow__formula {
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      color: rgba(49,179,164,0.85);
+      text-align: center;
+      white-space: nowrap;
+      max-width: 64px;
+      line-height: 1.3;
+    }
+
+    /* ===== Controls (stepper + play + scrub) ===== */
+    .vfx-controls {
+      margin-top: 18px;
+      padding: 16px 4px 4px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      grid-template-columns: auto auto 1fr auto auto;
+      gap: 14px;
+      align-items: center;
+    }
+    .vfx-btn {
+      background: transparent;
+      border: 1px solid rgba(236,231,223,0.25);
+      color: var(--cream);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .vfx-btn:hover:not(:disabled) { border-color: var(--tea); color: var(--tea); }
+    .vfx-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .vfx-play {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid var(--tea);
+      background: rgba(49,179,164,0.12);
+      color: var(--tea);
+      font-size: 14px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s ease;
+    }
+    .vfx-play:hover { background: var(--tea); color: var(--dark); }
+    .vfx-scrub {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+    .vfx-scrub::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--tea);
+      cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(49,179,164,0.18);
+    }
+    .vfx-scrub::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--tea);
+      border: none;
+      cursor: pointer;
+    }
+    .vfx-step-label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      color: rgba(236,231,223,0.7);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .vfx-step-label strong { color: var(--tea); font-weight: 500; }
+
+    /* ===== Caption ===== */
+    .vfx-caption {
+      margin: 12px 0 0;
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.55;
+      color: rgba(236,231,223,0.85);
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      min-height: 4.5em;
+      transition: opacity 0.25s ease;
+    }
+    .vfx-caption code {
+      font-family: var(--mono);
+      font-size: 13px;
+      background: rgba(49,179,164,0.12);
+      color: var(--tea);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* ===== Hint ===== */
+    .vfx-hint {
+      margin: 14px 0 0;
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      color: rgba(236,231,223,0.4);
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .vfx-hint .pin-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--tea);
+      margin-right: 6px;
+      vertical-align: middle;
+      animation: vfx-pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes vfx-pulse {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* ===== Operation boxes (LN, MLP) ===== */
+    .vfx-op {
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 6px;
+      background: rgba(49,179,164,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 8px;
+      color: rgba(236,231,223,0.92);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-align: center;
+      min-width: 56px;
+      width: 100%;
+    }
+    .vfx-op__title { font-weight: 500; }
+    .vfx-op--mlp {
+      gap: 4px;
+      padding: 10px 6px;
+      min-width: 80px;
+    }
+    .vfx-mlp__step {
+      width: 100%;
+      padding: 5px 4px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.28);
+      border-radius: 3px;
+      font-family: var(--mono);
+      font-size: 8.5px;
+      letter-spacing: 0.06em;
+      text-transform: none;
+      line-height: 1.3;
+      color: rgba(236,231,223,0.8);
+    }
+    .vfx-mlp__step--accent {
+      border-color: rgba(49,179,164,0.55);
+      background: rgba(49,179,164,0.16);
+      color: var(--tea);
+    }
+
+    /* ⊕ residual flow connector */
+    .vfx-flow--add .vfx-flow__arrow {
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid var(--tea);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(49,179,164,0.14);
+      color: var(--tea);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* ===== Stack (step 7) indicator ===== */
+    .vfx-stack-indicator {
+      position: absolute;
+      top: -8px;
+      right: -2px;
+      background: var(--tea);
+      color: var(--dark);
+      font-size: 8px;
+      letter-spacing: 0.16em;
+      padding: 3px 6px;
+      border-radius: 3px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      font-weight: 600;
+    }
+    .vfx[data-step="7"] .vfx-stack-indicator,
+    .vfx[data-step="8"] .vfx-stack-indicator {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Zoomed-out architecture view (steps 7 & 8) ===== */
+    .vfx-arch {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 4px 18px;
+      font-family: var(--mono);
+      animation: vfx-arch-in 0.45s ease both;
+    }
+    .vfx[data-step="7"] .vfx-arch,
+    .vfx[data-step="8"] .vfx-arch { display: flex; }
+    .vfx[data-step="7"] .vfx__canvas,
+    .vfx[data-step="8"] .vfx__canvas { display: none; }
+
+    @keyframes vfx-arch-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Generic boxed stage block */
+    .arch-box {
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 6px;
+      padding: 9px 14px;
+      background: rgba(0,0,0,0.22);
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cream);
+      min-width: 220px;
+      transition: opacity 0.4s ease, border-color 0.4s ease, background 0.4s ease, color 0.4s ease;
+    }
+    .arch-box__sub {
+      display: block;
+      margin-top: 3px;
+      font-size: 9px;
+      color: rgba(236,231,223,0.55);
+      letter-spacing: 0.08em;
+      text-transform: none;
+      font-family: var(--mono);
+    }
+
+    /* Tiny image thumb */
+    .arch-image {
+      width: 100px;
+      aspect-ratio: 4 / 3;
+      background: url('assets/banff.jpg') center/cover;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .arch-image__grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.35) 1px, transparent 1px);
+      background-size: 25% 33.33%;
+    }
+    .arch-label-small {
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      color: rgba(236,231,223,0.55);
+      text-transform: uppercase;
+    }
+
+    /* Down-arrow between stages */
+    .arch-arrow {
+      color: var(--tea);
+      font-size: 15px;
+      line-height: 1;
+      opacity: 0.75;
+    }
+
+    /* Encoder block — the expanded multi-layer view */
+    .arch-encoder {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 80px;
+      gap: 0 14px;
+      border: 1.5px dashed rgba(49,179,164,0.6);
+      border-radius: 10px;
+      padding: 16px 20px 16px 16px;
+      background: rgba(49,179,164,0.045);
+      width: 360px;
+      max-width: 100%;
+    }
+    .arch-encoder__inner {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .arch-encoder__header {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      color: var(--tea);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .arch-sub {
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 5px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.25);
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+    .arch-sub--accent {
+      border-color: rgba(49,179,164,0.55);
+      background: linear-gradient(135deg, rgba(49,179,164,0.16), rgba(49,179,164,0.04));
+    }
+    .arch-sub__detail {
+      display: block;
+      margin-top: 3px;
+      font-size: 8.5px;
+      color: rgba(236,231,223,0.55);
+      letter-spacing: 0.08em;
+      text-transform: none;
+      font-family: var(--mono);
+    }
+    .arch-add {
+      align-self: center;
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid var(--tea);
+      border-radius: 999px;
+      color: var(--tea);
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+      background: rgba(49,179,164,0.12);
+      font-weight: 600;
+    }
+    .arch-arrow--mini {
+      align-self: center;
+      color: var(--tea);
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    /* SVG column showing residual curves */
+    .arch-encoder__residuals {
+      width: 80px;
+      height: 100%;
+      position: relative;
+      align-self: stretch;
+    }
+    .arch-encoder__residuals svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .arch-encoder__residuals .resid-path {
+      fill: none;
+      stroke: var(--tea);
+      stroke-width: 1.2;
+      stroke-dasharray: 3 3;
+      opacity: 0.85;
+    }
+    .arch-encoder__residuals .resid-label {
+      font-family: var(--mono);
+      font-size: 7.5px;
+      letter-spacing: 0.12em;
+      fill: var(--tea);
+      text-transform: uppercase;
+    }
+
+    /* × N badge */
+    .arch-encoder__badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: var(--tea);
+      color: var(--dark);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.16em;
+      box-shadow: 0 0 0 4px var(--dark);
+    }
+    .arch-encoder__badge small {
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      margin-left: 4px;
+      opacity: 0.85;
+    }
+
+    /* Classifier head — revealed in step 8 */
+    .arch-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.5s ease, filter 0.5s ease;
+    }
+    .vfx[data-step="7"] .arch-head { opacity: 0.22; filter: saturate(0.4); }
+    .vfx[data-step="8"] .arch-head { opacity: 1; }
+    .vfx[data-step="8"] .arch-head .arch-box--final {
+      border-color: var(--tea);
+      background: linear-gradient(135deg, rgba(49,179,164,0.22), rgba(49,179,164,0.06));
+      color: var(--tea);
+    }
+    .arch-cls {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      color: var(--tea);
+      text-transform: uppercase;
+    }
+    .arch-cls__sq {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background: var(--tea);
+      box-shadow: 0 0 6px rgba(49,179,164,0.55);
+    }
+
+    /* Classes output preview */
+    .arch-classes {
+      margin-top: 4px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .arch-classes span {
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: rgba(236,231,223,0.65);
+      padding: 3px 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 999px;
+      background: rgba(0,0,0,0.25);
+    }
+    .arch-classes span.is-pred {
+      color: var(--tea);
+      border-color: var(--tea);
+      background: rgba(49,179,164,0.14);
+    }
+
+    /* legacy classifier head — hidden now (replaced by .arch-head) */
+    .vfx-head { display: none !important; }
+
+    @media (max-width: 960px) {
+      .vfx { padding: 18px; }
+      .vfx__canvas { gap: 24px; min-height: auto; }
+      /* Each row stays a single horizontal strip and scrolls if it overflows */
+      .vfx__row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 6px 4px 12px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(49,179,164,0.45) transparent;
+      }
+      .vfx__row::-webkit-scrollbar { height: 4px; }
+      .vfx__row::-webkit-scrollbar-thumb { background: rgba(49,179,164,0.45); border-radius: 2px; }
+      .vfx__row::-webkit-scrollbar-track { background: transparent; }
+      .vfx-stage { flex: 0 0 auto; }
+      .vfx-flow { flex: 0 0 auto; padding: 0 2px; }
+      .vfx-image { width: 150px; max-width: none; }
+      .vfx-tokens { width: 36px; max-width: none; }
+      .vfx-qkv .vfx-tokens { width: 28px; }
+      .vfx-matrix { width: 150px; max-width: none; }
+      .vfx-controls { grid-template-columns: 1fr; gap: 10px; }
+      .vfx__row--post::before { font-size: 8.5px; padding: 0 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============== TOP NAV ============== -->
+  <div class="topnav">
+    <a class="topnav__brand" href="index.html">
+      <svg class="topnav__logo" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="#31b3a4" stroke-width="3"/>
+        <text x="60" y="62" text-anchor="middle" dominant-baseline="central" font-family="Sacramento, cursive" font-weight="400" font-size="46" fill="#31b3a4">LW</text>
+      </svg>
+      <span class="topnav__brand-text">Linda Wang</span>
+    </a>
+    <nav>
+      <a href="index.html">About</a>
+      <a href="publications.html">Publications</a>
+      <a href="notes.html">Notes</a>
+      <a class="active" href="studio.html">Studio</a>
+    </nav>
+    <div>2026 Edition</div>
+  </div>
+
+  <!-- ============== INTRO ============== -->
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__num"><span>STUDIO —</span>SKETCHES<br>&amp; PROTOTYPES</div>
+      <div>
+        <div class="prose">
+          <p>Small things I'm building — visualizations of ideas I find interesting, interactive demos, and prototypes that aren't quite anything yet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== §01 — ViT EXPLORER ============== -->
+  <section class="section">
+    <div class="section__inner">
+      <div class="section__num"><span>01 —</span>VIT,<br>EXPLORED</div>
+      <div>
+        <div class="prose">
+          <p>
+            A Vision Transformer (ViT) turns an image into a sequence of tokens, then runs it
+            through a standard transformer — no convolutions involved. The diagram below shows
+            every stage at once. Step through the narrative, or
+            <strong>hover any patch (or any bar)</strong> to trace one token's path through the
+            whole pipeline.
+          </p>
+        </div>
+
+        <div class="vfx" id="vfx" data-step="1">
+
+          <!-- Pipeline ribbon -->
+          <div class="vfx__ribbon" id="vfxRibbon">
+            <button class="vfx-chip is-active" data-step="1"><span class="vfx-chip__num">01</span>Image</button>
+            <button class="vfx-chip" data-step="2"><span class="vfx-chip__num">02</span>Patches</button>
+            <button class="vfx-chip" data-step="3"><span class="vfx-chip__num">03</span>Embed</button>
+            <button class="vfx-chip" data-step="4"><span class="vfx-chip__num">04</span>Q · K · V</button>
+            <button class="vfx-chip" data-step="5"><span class="vfx-chip__num">05</span>Attention</button>
+            <button class="vfx-chip" data-step="6"><span class="vfx-chip__num">06</span>Output</button>
+            <button class="vfx-chip" data-step="7"><span class="vfx-chip__num">07</span>× N Layers</button>
+            <button class="vfx-chip" data-step="8"><span class="vfx-chip__num">08</span>Classify</button>
+          </div>
+
+          <!-- Main canvas (all stages always visible) -->
+          <div class="vfx__canvas" id="vfxCanvas">
+            <svg class="vfx__trace" id="vfxTrace" aria-hidden="true">
+              <path id="vfxTracePath"></path>
+            </svg>
+
+            <!-- ROW 1 — MHA pipeline: image → embed → Q,K,V → attn → A·V -->
+            <div class="vfx__row">
+
+            <!-- IMAGE -->
+            <div class="vfx-stage" data-stage="image">
+              <div class="vfx-stage__head">Image</div>
+              <div class="vfx-stage__body">
+                <div class="vfx-image">
+                  <div class="vfx-image__bg"></div>
+                  <div class="vfx-image__grid" id="vfxPatchGrid"></div>
+                </div>
+              </div>
+              <div class="vfx-stage__shape">H × W × 3</div>
+            </div>
+
+            <div class="vfx-flow">
+              <div class="vfx-flow__arrow">→</div>
+              <div class="vfx-flow__formula">flatten<br>+ project<br>+ pos enc</div>
+            </div>
+
+            <!-- EMBEDDINGS -->
+            <div class="vfx-stage" data-stage="embed">
+              <div class="vfx-stage__head">Embedding X</div>
+              <div class="vfx-stage__body">
+                <div class="vfx-tokens" id="vfxEmbed"></div>
+              </div>
+              <div class="vfx-stage__shape">(N+1) × D</div>
+            </div>
+
+            <div class="vfx-flow">
+              <div class="vfx-flow__arrow">→</div>
+              <div class="vfx-flow__formula">× W<sub>Q,K,V</sub></div>
+            </div>
+
+            <!-- Q · K · V -->
+            <div class="vfx-qkv">
+              <div class="vfx-stage" data-stage="q">
+                <div class="vfx-stage__head">Q</div>
+                <div class="vfx-stage__body">
+                  <div class="vfx-tokens" id="vfxQ"></div>
+                </div>
+                <div class="vfx-stage__shape">queries</div>
+              </div>
+              <div class="vfx-stage" data-stage="k">
+                <div class="vfx-stage__head">K</div>
+                <div class="vfx-stage__body">
+                  <div class="vfx-tokens" id="vfxK"></div>
+                </div>
+                <div class="vfx-stage__shape">keys</div>
+              </div>
+              <div class="vfx-stage" data-stage="v">
+                <div class="vfx-stage__head">V</div>
+                <div class="vfx-stage__body">
+                  <div class="vfx-tokens" id="vfxV"></div>
+                </div>
+                <div class="vfx-stage__shape">values</div>
+              </div>
+            </div>
+
+            <div class="vfx-flow">
+              <div class="vfx-flow__arrow">→</div>
+              <div class="vfx-flow__formula">softmax<br>(Q·K<sup>T</sup>/√d<sub>k</sub>)</div>
+            </div>
+
+            <!-- ATTENTION MATRIX -->
+            <div class="vfx-stage" data-stage="attn">
+              <div class="vfx-stage__head">Attention A</div>
+              <div class="vfx-stage__body">
+                <div class="vfx-matrix" id="vfxMatrix"></div>
+              </div>
+              <div class="vfx-stage__shape">(N+1) × (N+1)</div>
+            </div>
+
+            <div class="vfx-flow">
+              <div class="vfx-flow__arrow">→</div>
+              <div class="vfx-flow__formula">A · V</div>
+            </div>
+
+            <!-- OUTPUT -->
+            <div class="vfx-stage" data-stage="output">
+              <div class="vfx-stage__head">Attn out</div>
+              <div class="vfx-stage__body">
+                <div class="vfx-tokens" id="vfxOutput"></div>
+              </div>
+              <div class="vfx-stage__shape">A · V</div>
+            </div>
+
+            </div><!-- /vfx__row 1 -->
+
+            <!-- ROW 2 — attention output flows through MLP to produce block output -->
+            <div class="vfx__row vfx__row--post">
+
+              <div class="vfx-flow">
+                <div class="vfx-flow__arrow">→</div>
+                <div class="vfx-flow__formula">feed-forward</div>
+              </div>
+
+              <div class="vfx-stage" data-stage="mlp">
+                <div class="vfx-stage__head">MLP</div>
+                <div class="vfx-stage__body">
+                  <div class="vfx-op vfx-op--mlp">
+                    <span class="vfx-mlp__step">Linear<br>D → 4D</span>
+                    <span class="vfx-mlp__step vfx-mlp__step--accent">GELU</span>
+                    <span class="vfx-mlp__step">Linear<br>4D → D</span>
+                  </div>
+                </div>
+                <div class="vfx-stage__shape">feed-forward</div>
+              </div>
+
+              <div class="vfx-flow">
+                <div class="vfx-flow__arrow">→</div>
+              </div>
+
+              <div class="vfx-stage" data-stage="block">
+                <div class="vfx-stage__head">Block out</div>
+                <div class="vfx-stage__body">
+                  <div class="vfx-tokens" id="vfxBlock"></div>
+                </div>
+                <div class="vfx-stage__shape">(N+1) × D</div>
+                <div class="vfx-stack-indicator">× N LAYERS</div>
+              </div>
+
+            </div><!-- /vfx__row 2 -->
+          </div>
+
+          <!-- Zoomed-out architecture diagram (steps 7 & 8) -->
+          <div class="vfx-arch" id="vfxArch">
+
+            <!-- Image -->
+            <div class="arch-image"><div class="arch-image__grid"></div></div>
+            <div class="arch-label-small">Image &middot; H &times; W &times; 3</div>
+
+            <div class="arch-arrow">&darr;</div>
+            <div class="arch-label-small" style="color: rgba(49,179,164,0.85);">linear projection &middot; +&thinsp;positional encoding &middot; prepend [CLS]</div>
+
+            <!-- Embedded sequence -->
+            <div class="arch-box">
+              Patch + position embeddings
+              <span class="arch-box__sub">sequence X &middot; (N+1) &times; D</span>
+            </div>
+
+            <div class="arch-arrow">&darr;</div>
+
+            <!-- Encoder block (expanded) with residuals -->
+            <div class="arch-encoder">
+              <div class="arch-encoder__inner">
+                <div class="arch-encoder__header">Transformer encoder block</div>
+
+                <div class="arch-sub">LayerNorm</div>
+                <div class="arch-arrow--mini">&darr;</div>
+                <div class="arch-sub arch-sub--accent">
+                  Multi-Head Attention
+                  <span class="arch-sub__detail">h heads &middot; each runs Q&middot;K&middot;V &rarr; softmax &rarr; A&middot;V</span>
+                </div>
+                <div class="arch-arrow--mini">&darr;</div>
+                <div class="arch-add" title="Residual add">+</div>
+
+                <div class="arch-arrow--mini">&darr;</div>
+
+                <div class="arch-sub">LayerNorm</div>
+                <div class="arch-arrow--mini">&darr;</div>
+                <div class="arch-sub arch-sub--accent">
+                  MLP
+                  <span class="arch-sub__detail">Linear &rarr; GELU &rarr; Linear</span>
+                </div>
+                <div class="arch-arrow--mini">&darr;</div>
+                <div class="arch-add" title="Residual add">+</div>
+              </div>
+
+              <div class="arch-encoder__residuals">
+                <svg viewBox="0 0 80 100" preserveAspectRatio="none">
+                  <!-- residual 1: from top input bypasses LN+MHA, lands at first ⊕ -->
+                  <path class="resid-path" d="M 4 6 C 50 6, 50 38, 4 38"></path>
+                  <text class="resid-label" x="36" y="22">residual</text>
+                  <!-- residual 2: from after first ⊕, bypasses LN+MLP, lands at second ⊕ -->
+                  <path class="resid-path" d="M 4 50 C 50 50, 50 92, 4 92"></path>
+                  <text class="resid-label" x="36" y="71">residual</text>
+                </svg>
+              </div>
+
+              <div class="arch-encoder__badge">&times; N <small>blocks</small></div>
+            </div>
+
+            <div class="arch-arrow">&darr;</div>
+
+            <!-- Encoder output -->
+            <div class="arch-box">
+              Contextualized sequence
+              <span class="arch-box__sub">[CLS] + N patch tokens</span>
+            </div>
+
+            <!-- Classifier head (dimmed in step 7, lit in step 8) -->
+            <div class="arch-head">
+              <div class="arch-arrow">&darr;</div>
+              <div class="arch-cls">
+                <span class="arch-cls__sq"></span> [CLS] token readout
+              </div>
+
+              <div class="arch-arrow">&darr;</div>
+              <div class="arch-box">
+                LayerNorm &middot; MLP head
+                <span class="arch-box__sub">Linear &rarr; softmax over classes</span>
+              </div>
+
+              <div class="arch-arrow">&darr;</div>
+              <div class="arch-box arch-box--final">
+                Class probabilities
+              </div>
+              <div class="arch-classes" aria-hidden="true">
+                <span class="is-pred">mountain</span>
+                <span>forest</span>
+                <span>lake</span>
+                <span>sky</span>
+                <span>road</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Caption -->
+          <p class="vfx-caption" id="vfxCaption"></p>
+
+          <!-- Controls -->
+          <div class="vfx-controls">
+            <button class="vfx-btn" id="vfxPrev" type="button">← Prev</button>
+            <button class="vfx-play" id="vfxPlay" type="button" aria-label="Play">▶</button>
+            <input class="vfx-scrub" id="vfxScrub" type="range" min="1" max="8" value="1" step="1">
+            <div class="vfx-step-label">Step <strong id="vfxStepNum">1</strong> of 8 · <strong id="vfxStepName">Image</strong></div>
+            <button class="vfx-btn" id="vfxNext" type="button">Next →</button>
+          </div>
+
+          <p class="vfx-hint">
+            <span class="pin-dot"></span>
+            Hover or tap any patch / bar / cell to trace one token's data through every stage. Click to pin.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== COLOPHON ============== -->
+  <footer class="colophon colophon--two">
+    <div>
+      <div class="colophon__heading">Find me</div>
+      <div class="colophon__body colophon__links">
+        <a href="https://scholar.google.com/citations?user=4azPe_YAAAAJ&hl=en">Scholar</a>
+        <a href="https://github.com/lindawangg">GitHub</a>
+        <a href="https://www.linkedin.com/in/lindawang95/">LinkedIn</a>
+        <a href="https://lindawangg.medium.com/">Medium</a>
+        <a href="https://www.instagram.com/lindawanggg/">Instagram</a>
+      </div>
+    </div>
+    <div class="colophon__stamp" aria-hidden="true">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="#31b3a4" stroke-width="2"/>
+        <text x="60" y="62" text-anchor="middle" dominant-baseline="central" font-family="Sacramento, cursive" font-weight="400" font-size="46" fill="#31b3a4">LW</text>
+      </svg>
+    </div>
+    <div class="colophon__right">
+      Last set · 2026 &nbsp;·&nbsp; Set in Newsreader &amp; JetBrains Mono &nbsp;·&nbsp; © Linda Wang
+    </div>
+  </footer>
+
+  <script src="studio.js"></script>
+
+</body>
+</html>
