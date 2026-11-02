@@ -1,1 +1,5 @@
 *.DS_Store
+
+# Plaintext source + build tooling for the encrypted /alwed page.
+# NEVER commit these — they contain the unencrypted content and images.
+alwed/src/
